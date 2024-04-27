@@ -3,7 +3,6 @@
 
 #include <shared_mutex>
 #include <vector>
-#include <memory>
 #include "URLSessionDataTask.hpp"
 
 namespace network {

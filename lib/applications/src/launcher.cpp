@@ -152,24 +152,16 @@ int launcher()
         placementIndex++;
     }
 
-/************************************
- * test pour le network
- ***********************************/
-
-
-    Label* networkLabel = new Label(20, 40, 20, 20);
+    Label* networkLabel = new Label(120, 360, 20, 20);
     networkLabel->setBackgroundColor(COLOR_DARK);
     networkLabel->setText("Network");
     networkLabel->setTextColor(COLOR_WHITE);
     networkLabel->setFontSize(16);
     win.addChild(networkLabel);
 
-    Label* progressLabel = new Label(10, 420, 0, 20);
+    Label* progressLabel = new Label(10, 400, 0, 20);
     progressLabel->setBackgroundColor(COLOR_SUCCESS);
     win.addChild(progressLabel);
-
-
-// //////////////////////////////////////////////////
 
     while (!hardware::getHomeButton() && AppManager::isAnyVisibleApp() == false)
     {
@@ -183,16 +175,11 @@ int launcher()
         }
 
         eventHandlerApp.update();
-
-/************************************
- * test pour le network
- ***********************************/
-
-       if (networkLabel->isTouched())
+        if (networkLabel->isTouched())
         {
             std::cout << "connection status " << network::NetworkManager::sharedInstance->isConnected() << std::endl;
 
-            #ifndef ESP_PLATFORM
+            #if !defined(ESP32)
             network::URLSessionDataTask* getTask = network::URLSession::defaultInstance.get()->dataTaskWithURL(network::URL("https://www.youtube.com/s/player/652ba3a2/player_ias.vflset/fr_FR/base.js"), [](const std::string& data)
             {
                 {
@@ -218,13 +205,13 @@ int launcher()
             };
             getTask->uploadProgressHandler = [](double progress)
             {
-                //std::cout << "Received upload progress " << progress << std::endl;
+                std::cout << "Received upload progress " << progress << std::endl;
             };
 
             getTask->resume();
             #endif
 
-            network::URLRequest advancedGETRequest = network::URLRequest(network::URL("https://azerpoiu.requestcatcher.com/test"));
+            network::URLRequest advancedGETRequest = network::URLRequest(network::URL("https://fneifneiofnoefwefiwenf.requestcatcher.com/test"));
             advancedGETRequest.httpHeaderFields.insert(std::pair<std::string, std::string>("Custom-Header", "Hello world!"));
             network::URLSessionDataTask* advancedGetTask = network::URLSession::defaultInstance.get()->dataTaskWithRequest(advancedGETRequest, [](const std::string& data)
             {
@@ -234,7 +221,7 @@ int launcher()
             });
             advancedGetTask->resume();
 
-            network::URLRequest advancedPOSTRequest = network::URLRequest(network::URL("https://azerpoiu.requestcatcher.com/test"));
+            network::URLRequest advancedPOSTRequest = network::URLRequest(network::URL("https://fneifneiofnoefwefiwenf.requestcatcher.com/test"));
             advancedPOSTRequest.method = network::URLRequest::HTTPMethod::POST;
             advancedPOSTRequest.httpBody = "Hello world!";
             advancedPOSTRequest.httpHeaderFields.insert(std::pair<std::string, std::string>("Custom-Header", "Hello world!"));
@@ -251,8 +238,6 @@ int launcher()
 
             postTask->resume();
         }
-// //////////////////////////////////////////////////
-
         win.updateAll();
 
         AppManager::loop();

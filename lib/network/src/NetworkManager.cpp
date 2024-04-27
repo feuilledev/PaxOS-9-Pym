@@ -1,10 +1,11 @@
 #include "NetworkManager.hpp"
 
-#ifdef ESP_PLATFORM
+#ifdef ESP32
     #include <WiFi.h>
+#else
+    #include <iostream>
+    #include <curl/curl.h>
 #endif
-#include <iostream>
-#include <curl/curl.h>
 
 namespace network
 {
@@ -12,62 +13,61 @@ namespace network
 
     NetworkManager::NetworkManager()
     {
-        #ifdef ESP_PLATFORM
+        #ifdef ESP32
             this->turnON();
+        #else
+            curl_global_init(CURL_GLOBAL_ALL);
         #endif
-        curl_global_init(CURL_GLOBAL_ALL);
     }
 
     const void NetworkManager::connect(const std::string& ssid)
     {
-        #ifdef ESP_PLATFORM
+        #ifdef ESP32
             WiFi.begin(ssid.c_str());
         #endif
     }
 
     const void NetworkManager::connect(const std::string& ssid, const std::string& password)
     {
-        #ifdef ESP_PLATFORM
+        #ifdef ESP32
             WiFi.begin(ssid.c_str(), password.c_str());
         #endif
     }
 
     const void NetworkManager::disconnect(void)
     {
-        #ifdef ESP_PLATFORM
+        #ifdef ESP32
             WiFi.disconnect();
         #endif
     }
 
     const void NetworkManager::turnOFF(void)
     {
-        #ifdef ESP_PLATFORM
+        #ifdef ESP32
             WiFi.mode(WIFI_OFF);
         #endif
     }
 
     const void NetworkManager::turnON(void)
     {
-        #ifdef ESP_PLATFORM
+        #ifdef ESP32
             WiFi.mode(WIFI_STA);
         #endif
     }
 
     const bool NetworkManager::isConnected()
     {
-        #ifdef ESP_PLATFORM
-            if (WiFi.status() != WL_CONNECTED)
-                return false;
+        #ifdef ESP32
+            return WiFi.status() == WL_CONNECTED;
         #else
-        
-        int pingExitCode = system("ping -c1 -s1 8.8.8.8 > /dev/null 2>&1"); // ping Google's DNS server and return the exit code
-        if (pingExitCode == 0)
-        {
-            return true;
-        } else
-        {
-            return false;
-        }
-       #endif
+            int pingExitCode = system("ping -c1 -s1 8.8.8.8 > /dev/null 2>&1"); // ping Google's DNS server and return the exit code
+            if (pingExitCode == 0)
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
+        #endif
     }
 }

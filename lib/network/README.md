@@ -65,3 +65,9 @@ virtual class URLSessionTask {
 }
 
 Pour ce qui est des URLSessionDataTask, URLSessionDownloadTask, URLSessionUploadTask et URLSessionWebSocketTask qui sont toutes dérivées de URLSessionTask, elles ont des callbacks en plus de base en fonction de ce qu'elles font.
+
+
+
+
+
+
