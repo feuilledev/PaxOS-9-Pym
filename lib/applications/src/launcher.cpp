@@ -2,15 +2,7 @@
 
 #include <app.hpp>
 #include <gsm.hpp>
-#include <gui.hpp>
-#include <GuiManager.hpp>
 
-
-/**
- * Helper fonction
- * récupére l'heure du device (ou la locale)
- * et la renvoie au format "DDDD DD MMMM"
- */
 std::string getFormatedDate()
 {
     uint16_t day_ = GSM::days;
@@ -50,7 +42,7 @@ int launcher()
     // Affichage de la date du jour
     Label *date = new Label(55, 89, 210, 18);
     Date data = {GSM::days, GSM::months, GSM::years};
-    date->setText(getFormatedDate()); 
+    date->setText(getFormateddate()); 
     date->setVerticalAlignment(Label::Alignement::CENTER);
     date->setHorizontalAlignment(Label::Alignement::CENTER);
     date->setFontSize(16);
@@ -82,6 +74,7 @@ int launcher()
             if(min!=GSM::minutes)
             {
                 hour->setText(std::to_string(GSM::hours) + ":" + (GSM::minutes<=9 ? "0" : "") + std::to_string(GSM::minutes));
+                date->setText(getFormatedDate());
                 date->setText(getFormatedDate());
                 min = GSM::minutes;
             }
