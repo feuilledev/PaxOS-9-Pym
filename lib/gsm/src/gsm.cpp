@@ -622,18 +622,22 @@ namespace GSM
     {
         std::string data = send("AT+CCLK?", "+CCLK:");
 
-// si on est sur ESP, alors, on check l'heure via  commande AT
-#ifdef ESP_PLATFORM
+        // si on est sur ESP, alors, on check l'heure via  commande AT
+        #ifdef ESP_PLATFORM
 
-        std::cout << data << std::endl;
+            std::cout << data << std::endl;
 
-        size_t start = data.find("\"");
-        if (start == std::string::npos)
-        {
-            return;
-        }
-        start++;
+            // Find the start and end positions of the date and time string
+            size_t start = data.find("\"");
+            if (start == std::string::npos) {
+                return;
+            }
+            start++;
 
+            size_t end = data.find("+");
+            if (end == std::string::npos) {
+                return;
+            }
             size_t end = data.find("+");
             if (end == std::string::npos) {
                 return;
@@ -641,7 +645,17 @@ namespace GSM
 
             // Extract the date and time string
             std::string dateTime = data.substr(start, end - start);
+            // Extract the date and time string
+            std::string dateTime = data.substr(start, end - start);
 
+            // Extract the year, month, and day
+            try {
+                years = std::atoi(dateTime.substr(0, 2).c_str());
+                months = std::atoi(dateTime.substr(3, 2).c_str());
+                days = std::atoi(dateTime.substr(6, 2).c_str());
+            } catch (const std::invalid_argument&) {
+                return;
+            }
             // Extract the year, month, and day
             try {
                 years = std::atoi(dateTime.substr(0, 2).c_str());
@@ -659,21 +673,29 @@ namespace GSM
             } catch (const std::invalid_argument&) {
                 return;
             }
+            // Extract the hour, minute, and second
+            try {
+                hours = std::atoi(dateTime.substr(9, 2).c_str());
+                minutes = std::atoi(dateTime.substr(12, 2).c_str());
+                seconds = std::atoi(dateTime.substr(15, 2).c_str());
+            } catch (const std::invalid_argument&) {
+                return;
+            }
 
         // si on est pas sur plateform ESP, on récupére l'heure et date system locale
-#else
-        time_t t = std::time(0); // get time now
-        tm *local_time = std::localtime(&t);
+        #else
+            time_t t = std::time(0);   // get time now
+            tm* local_time = std::localtime(&t);
 
-        years = local_time->tm_year + 1900;
-        months = local_time->tm_mon + 1;
-        days = local_time->tm_mday;
-        hours = local_time->tm_hour;
-        minutes = local_time->tm_min;
-        seconds = local_time->tm_sec;
-#endif
+            years   = local_time->tm_year + 1900;
+            months  = local_time->tm_mon + 1;
+            days   = local_time->tm_mday;
+            hours   = local_time->tm_hour;
+            minutes    = local_time->tm_min;
+            seconds    = local_time->tm_sec;                
+        #endif
 
-        // std::cout << years << "-" << months << "-" << days << " " << hours << ":" << minutes << ":" << seconds << std::endl;
+        std::cout << years << "-" << months << "-" << days << " " << hours << ":" << minutes << ":" << seconds << std::endl;
     }
 
     void getHour()
@@ -711,14 +733,12 @@ namespace GSM
                             { send("AT+CNTP=\"time.google.com\",8", "AT+CNTP"); send("AT+CNTP","AT+CNTP", 1000); }, priority::high});
 
         updateHour();
-        getNetworkQuality();
 
         // Mise à jour de l'heure toutes les 1000 ms
-        eventHandlerBack.setInterval(&GSM::getHour, 1000);
-        eventHandlerBack.setInterval(&GSM::getNetworkQuality, 10000);
-        eventHandlerBack.setInterval([]()
-                                     { requests.push_back({&GSM::getVoltage, GSM::priority::normal}); }, 5000);
-        // eventHandlerBack.setInterval(new Callback<>([](){if(send("AT", "AT").find("OK") == std::string::npos) init(); }), 15000);
+        eventHandlerBack.setInterval(new Callback<>(&GSM::getHour), 1000);
+        eventHandlerBack.setInterval(new Callback<>([](){ requests.push_back({&GSM::getVoltage, GSM::priority::normal}); }), 5000);
+
+        //eventHandlerBack.setInterval(new Callback<>([](){if(send("AT", "AT").find("OK") == std::string::npos) init(); }), 15000);
 
         keys.push_back({"RING", &GSM::onRinging});
         keys.push_back({"+CMTI:", &GSM::onMessage});
