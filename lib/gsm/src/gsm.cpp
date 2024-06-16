@@ -628,7 +628,7 @@ namespace GSM
 // si on est sur ESP, alors, on check l'heure via  commande AT
 #ifdef ESP_PLATFORM
 
-        std::cout << data << std::endl;
+            std::cout << data << std::endl;
 
             // Find the start and end positions of the date and time string
             size_t start = data.find("\"");
