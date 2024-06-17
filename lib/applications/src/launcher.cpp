@@ -42,7 +42,7 @@ int launcher()
     // Affichage de la date du jour
     Label *date = new Label(55, 89, 210, 18);
     Date data = {GSM::days, GSM::months, GSM::years};
-    date->setText(getFormateddate()); 
+    date->setText(getFormatedDate()); 
     date->setVerticalAlignment(Label::Alignement::CENTER);
     date->setHorizontalAlignment(Label::Alignement::CENTER);
     date->setFontSize(16);
