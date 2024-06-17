@@ -695,7 +695,7 @@ namespace GSM
             seconds    = local_time->tm_sec;                
         #endif
 
-        std::cout << years << "-" << months << "-" << days << " " << hours << ":" << minutes << ":" << seconds << std::endl;
+        // std::cout << years << "-" << months << "-" << days << " " << hours << ":" << minutes << ":" << seconds << std::endl;
     }
 
     void getHour()
