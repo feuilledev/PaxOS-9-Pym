@@ -567,9 +567,6 @@ namespace GSM
 
     int getBatteryLevel()
     {
-        float voltage = getVoltage();
-
-        if(voltage == -1)
         #ifdef ESP_PLATFORM
 
         if(voltage>4.12)
