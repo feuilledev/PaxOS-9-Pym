@@ -368,6 +368,11 @@ void LuaFile::load()
             lua.set("COLOR_LIGHT_GREEN", COLOR_LIGHT_GREEN);
             lua.set("COLOR_LIGHT_BLUE", COLOR_LIGHT_BLUE);
             lua.set("COLOR_LIGHT_GREY", COLOR_LIGHT_GREY);
+            lua.set("COLOR_PINK", COLOR_PINK);
+
+            lua.set("COLOR_LIGHT_GREEN", COLOR_LIGHT_GREEN);
+            lua.set("COLOR_LIGHT_BLUE", COLOR_LIGHT_BLUE);
+            lua.set("COLOR_LIGHT_GREY", COLOR_LIGHT_GREY);
 
         lua.set_function("launch", sol::overload([&](std::string name, std::vector<std::string> arg)
             {
