@@ -362,12 +362,20 @@ void LuaFile::load()
             lua.set("COLOR_CYAN", COLOR_CYAN);
             lua.set("COLOR_VIOLET", COLOR_VIOLET);
             lua.set("COLOR_ORANGE", COLOR_ORANGE);
-            lua.set("COLOR_GREY", COLOR_GREY);
-            lua.set("COLOR_PINK", COLOR_PINK);
 
-            lua.set("COLOR_LIGHT_GREEN", COLOR_LIGHT_GREEN);
-            lua.set("COLOR_LIGHT_BLUE", COLOR_LIGHT_BLUE);
-            lua.set("COLOR_LIGHT_GREY", COLOR_LIGHT_GREY);
+            lua.set("COLOR_WHITE", COLOR_WHITE);
+            lua.set("COLOR_BLACK", COLOR_BLACK);
+            lua.set("COLOR_RED", COLOR_RED);
+            lua.set("COLOR_GREEN", COLOR_GREEN);
+            lua.set("COLOR_BLUE", COLOR_BLUE);
+
+            lua.set("COLOR_YELLOW", COLOR_YELLOW);
+            lua.set("COLOR_GREY", COLOR_GREY);
+            lua.set("COLOR_MAGENTA", COLOR_MAGENTA);
+            lua.set("COLOR_CYAN", COLOR_CYAN);
+            lua.set("COLOR_VIOLET", COLOR_VIOLET);
+            lua.set("COLOR_ORANGE", COLOR_ORANGE);
+            lua.set("COLOR_GREY", COLOR_GREY);
             lua.set("COLOR_PINK", COLOR_PINK);
 
             lua.set("COLOR_LIGHT_GREEN", COLOR_LIGHT_GREEN);
