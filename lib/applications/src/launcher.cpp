@@ -2,7 +2,15 @@
 
 #include <app.hpp>
 #include <gsm.hpp>
+#include <gui.hpp>
+#include <GuiManager.hpp>
 
+
+/**
+ * Helper fonction
+ * récupére l'heure du device (ou la locale)
+ * et la renvoie au format "DDDD DD MMMM"
+ */
 std::string getFormatedDate()
 {
     uint16_t day_ = GSM::days;
