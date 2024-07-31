@@ -625,14 +625,14 @@ namespace GSM
 // si on est sur ESP, alors, on check l'heure via  commande AT
 #ifdef ESP_PLATFORM
 
-            std::cout << data << std::endl;
+        std::cout << data << std::endl;
 
-            // Find the start and end positions of the date and time string
-            size_t start = data.find("\"");
-            if (start == std::string::npos) {
-                return;
-            }
-            start++;
+        size_t start = data.find("\"");
+        if (start == std::string::npos)
+        {
+            return;
+        }
+        start++;
 
             size_t end = data.find("+");
             if (end == std::string::npos) {
@@ -661,17 +661,17 @@ namespace GSM
             }
 
         // si on est pas sur plateform ESP, on récupére l'heure et date system locale
-        #else
-            time_t t = std::time(0);   // get time now
-            tm* local_time = std::localtime(&t);
+#else
+        time_t t = std::time(0); // get time now
+        tm *local_time = std::localtime(&t);
 
-            years   = local_time->tm_year + 1900;
-            months  = local_time->tm_mon + 1;
-            days   = local_time->tm_mday;
-            hours   = local_time->tm_hour;
-            minutes    = local_time->tm_min;
-            seconds    = local_time->tm_sec;                
-        #endif
+        years = local_time->tm_year + 1900;
+        months = local_time->tm_mon + 1;
+        days = local_time->tm_mday;
+        hours = local_time->tm_hour;
+        minutes = local_time->tm_min;
+        seconds = local_time->tm_sec;
+#endif
 
         // std::cout << years << "-" << months << "-" << days << " " << hours << ":" << minutes << ":" << seconds << std::endl;
     }
@@ -714,10 +714,11 @@ namespace GSM
         getNetworkQuality();
 
         // Mise à jour de l'heure toutes les 1000 ms
-        eventHandlerBack.setInterval(new Callback<>(&GSM::getHour), 1000);
-        eventHandlerBack.setInterval(new Callback<>([](){ requests.push_back({&GSM::getVoltage, GSM::priority::normal}); }), 5000);
-
-        //eventHandlerBack.setInterval(new Callback<>([](){if(send("AT", "AT").find("OK") == std::string::npos) init(); }), 15000);
+        eventHandlerBack.setInterval(&GSM::getHour, 1000);
+        eventHandlerBack.setInterval(&GSM::getNetworkQuality, 10000);
+        eventHandlerBack.setInterval([]()
+                                     { requests.push_back({&GSM::getVoltage, GSM::priority::normal}); }, 5000);
+        // eventHandlerBack.setInterval(new Callback<>([](){if(send("AT", "AT").find("OK") == std::string::npos) init(); }), 15000);
 
         keys.push_back({"RING", &GSM::onRinging});
         keys.push_back({"+CMTI:", &GSM::onMessage});
