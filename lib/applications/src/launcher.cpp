@@ -1,9 +1,12 @@
 #include <launcher.hpp>
-
+#include "graphics.hpp"
+#include "ElementBase.hpp"
 #include <app.hpp>
 #include <gsm.hpp>
 #include <gui.hpp>
 #include <GuiManager.hpp>
+
+#include <../../network/network.hpp>
 
 
 /**
@@ -56,23 +59,30 @@ int launcher()
     date->setFontSize(16);
     win.addChild(date);
 
-    // Affichage du niveau de batterie
+    Box *light = new Box(0, 77, 50, 325);
+    //light->setBackgroundColor(COLOR_RED);
+    win.addChild(light);
+
     Label *batt = new Label(269, 10, 40, 18);
-    batt->setText(std::to_string(GSM::getBatteryLevel()) +" %");
+    batt->setText(std::to_string(GSM::getBatteryLevel()) + "%");    // hour
     batt->setVerticalAlignment(Label::Alignement::CENTER);
     batt->setHorizontalAlignment(Label::Alignement::CENTER);
     batt->setFontSize(18);
     win.addChild(batt);
 
-    // Affichage de la qualité réseau
+    Label *network = new Label(10, 10, 100, 18);
+    network->setVerticalAlignment(Label::Alignement::CENTER);
+    network->setHorizontalAlignment(Label::Alignement::LEFT);
+    network->setFontSize(18);
+    win.addChild(network);
+
     if(GSM::getNetworkStatus() == 99)
     {
-        Label *network = new Label(10, 10, 100, 18);
-        network->setText("pas de réseau");    // hour
-        network->setVerticalAlignment(Label::Alignement::CENTER);
-        network->setHorizontalAlignment(Label::Alignement::CENTER);
-        network->setFontSize(18);
-        win.addChild(network);
+        network->setText(" pas de réseau");    // hour
+    }
+    else
+    {
+        network->setText(" " + std::to_string(GSM::getNetworkStatus() * 100 / 31) + "%");
     }
 
     // Mise à jour de l'heure
@@ -94,10 +104,8 @@ int launcher()
      */
     std::vector<gui::ElementBase*> apps;
 
-
     // List contenant les app
-    VerticalList* winListApps = new VerticalList(0, 164, 320,316);
-    //winListApps->setBackgroundColor(COLOR_GREY);
+    VerticalList* winListApps = new VerticalList(0, 150, 320, 316);
     win.addChild(winListApps);
 
     // Placement des app dans l'écran
@@ -108,26 +116,64 @@ int launcher()
             continue;
 
 //        Box* box = new Box(60 + 119 * (placementIndex%2), 164 + 95 * int(placementIndex/2), 80, 80);
-        Box* box = new Box(60 + 119 * (placementIndex%2), 95 * int(placementIndex/2), 80, 80);
+        Box* box = new Box(35 + 85 * (placementIndex%3), 85 * int(placementIndex/3), 80, 80);
+        box->setRadius(10);
+        box->setBackgroundColor(COLOR_LIGHT_GREY);
 
-        Image* img = new Image(AppManager::appList[i].path / "../icon.png", 20, 6, 40, 40);
+        Image* img = new Image(AppManager::appList[i].path / "../icon.png", 20, 6, 40, 40, COLOR_LIGHT_GREY);
         img->load();
+        //img->setTransparency(true);
+        img->setTransparentColor(COLOR_WHITE);
         box->addChild(img);
 
-        Label* text = new Label(0, 46, 80, 34);
+        Label* text = new Label(5, 46, 70, 34);
+//        Label* text = new Label(0, 46, 80, 34);
         text->setText(AppManager::appList[i].name);
         text->setVerticalAlignment(Label::Alignement::CENTER);
         text->setHorizontalAlignment(Label::Alignement::CENTER);
+        text->setBackgroundColor(COLOR_LIGHT_GREY);
         text->setFontSize(16);
         box->addChild(text);
 
-        //win.addChild(box);
+        // Gestion des notifications de nouveaux messages
+        storage::Path notifs = (AppManager::appList[i].path / ".." / "unread.txt");
+        if(notifs.exists())
+        {
+            storage::FileStream file(notifs.str(), storage::READ);
+            
+            if(file.size() > 0)
+            {
+                Box* notifBox = new Box(66, 0, 14, 14);
+                notifBox->setRadius(7);
+                notifBox->setBackgroundColor(COLOR_WARNING);
+                box->addChild(notifBox);
+            }
+
+            file.close();
+        }
+
         winListApps->addChild(box);
-        
+
         apps.push_back(box);
         
         placementIndex++;
     }
+
+/************************************
+ * test pour le network
+ ***********************************/
+
+    Label* networkLabel = new Label(20, 40, 20, 20);
+    networkLabel->setBackgroundColor(COLOR_DARK);
+    networkLabel->setText("Network");
+    networkLabel->setTextColor(COLOR_WHITE);
+    networkLabel->setFontSize(16);
+    win.addChild(networkLabel);
+  
+    Label* progressLabel = new Label(10, 400, 0, 20);
+    progressLabel->setBackgroundColor(COLOR_SUCCESS);
+    win.addChild(progressLabel);
+  // //////////////////////////////////////////////////
 
     while (!hardware::getHomeButton() && AppManager::isAnyVisibleApp() == false)
     {
@@ -140,7 +186,86 @@ int launcher()
             }
         }
 
+        if (light->isFocused(true))
+        {
+            std::cout << "brightness: " << graphics::brightness << std::endl;
+            graphics::brightness = (325 - (gui::ElementBase::touchY - 77)) * 255 / 325;
+            if(graphics::brightness > 255)
+                graphics::brightness = 255;
+            else if(graphics::brightness < 3)
+                graphics::brightness = 3;
+            graphics::setBrightness(graphics::brightness);
+        }
+
         eventHandlerApp.update();
+      /************************************
+       * test pour le network
+       ***********************************/
+
+       if (networkLabel->isTouched())
+        {
+            std::cout << "connection status " << network::NetworkManager::sharedInstance->isConnected() << std::endl;
+
+            #ifndef ESP_PLATFORM
+            network::URLSessionDataTask* getTask = network::URLSession::defaultInstance.get()->dataTaskWithURL(network::URL("https://www.youtube.com/s/player/652ba3a2/player_ias.vflset/fr_FR/base.js"), [](const std::string& data)
+            {
+                {
+                    std::cout << "get request data: " << std::endl;
+                }
+            });
+            getTask->downloadProgressHandler = [&](double progress)
+            {
+                std::cout << "Received progress " << progress << std::endl;
+                progressLabel->setWidth(300 * progress);
+
+                if (networkLabel->isTouched())
+                {
+                    if (getTask->state == network::URLSessionTask::State::Running)
+                    {
+                        getTask->cancel();
+                        progressLabel->setWidth(0);
+                    }
+                    
+                }
+
+                win.updateAll();
+            };
+            getTask->uploadProgressHandler = [](double progress)
+            {
+                std::cout << "Received upload progress " << progress << std::endl;
+            };
+
+            getTask->resume();
+            #endif
+
+            network::URLRequest advancedGETRequest = network::URLRequest(network::URL("https://azerpoiu.requestcatcher.com/test"));
+            advancedGETRequest.httpHeaderFields.insert(std::pair<std::string, std::string>("Custom-Header", "Hello world!"));
+            network::URLSessionDataTask* advancedGetTask = network::URLSession::defaultInstance.get()->dataTaskWithRequest(advancedGETRequest, [](const std::string& data)
+            {
+                {
+                    std::cout << "get advanced request data: " << data << std::endl;
+                }
+            });
+            advancedGetTask->resume();
+
+            network::URLRequest advancedPOSTRequest = network::URLRequest(network::URL("https://azerpoiu.requestcatcher.com/test"));
+            advancedPOSTRequest.method = network::URLRequest::HTTPMethod::POST;
+            advancedPOSTRequest.httpBody = "Hello world!";
+            advancedPOSTRequest.httpHeaderFields.insert(std::pair<std::string, std::string>("Custom-Header", "Hello world!"));
+            network::URLSessionDataTask* postTask = network::URLSession::defaultInstance.get()->dataTaskWithRequest(advancedPOSTRequest, [&](const std::string& data)
+            {
+                {
+                    std::cout << "get advanced post data: " << data << std::endl;
+                    networkLabel->setText(data);
+                    networkLabel->setWidth(100);
+                    networkLabel->setBackgroundColor(COLOR_WHITE);
+                    networkLabel->setTextColor(COLOR_DARK);
+                }
+            });
+
+            postTask->resume();
+        }
+        // //////////////////////////////////////////////////
         win.updateAll();
 
         AppManager::loop();

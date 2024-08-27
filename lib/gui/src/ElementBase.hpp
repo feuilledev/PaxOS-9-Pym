@@ -68,6 +68,8 @@ namespace gui
 
         void enable();
         void disable();
+        bool getIsEnabled() const;
+
         void free();    // free the buffers in the ram to allow more windows to work at the same time
 
         /**
@@ -109,6 +111,8 @@ namespace gui
 
         bool m_isRendered; // si le buffer est a jour
         bool m_isDrawn;    // si le widget est bien a jour sur l'écran
+        bool m_autoDelete; // si le buffer du widget est supprimé automatiquement si en dehors de l'écran
+
         static ElementBase *masterOfRender;
         static ElementBase *mainWindow;
 

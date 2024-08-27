@@ -24,6 +24,7 @@ class LuaGui
     LuaBox* box(LuaWidget* parent, int x, int y, int width, int height);
     LuaCanvas* canvas(LuaWidget* parent, int x, int y, int width, int height);
     LuaImage* image(LuaWidget* parent, std::string path, int x, int y, int width, int height, color_t background = COLOR_WHITE);
+//    LuaImage* image(LuaWidget* parent, std::string path, int x, int y, int width, int height);
     LuaLabel* label(LuaWidget* parent, int x, int y, int width, int height);
     LuaInput* input(LuaWidget* parent, int x, int y);
     LuaButton* button(LuaWidget* parent, int x, int y, int width, int height);
@@ -41,6 +42,12 @@ class LuaGui
     void update();
 
     void setMainWindow(LuaWindow* window);
+    LuaWindow* getMainWindow();
+
+    void showInfoMessage(const std::string& msg );
+    void showWarningMessage(const std::string& msg );
+    void showErrorMessage(const std::string& msg );
+
     LuaWindow* mainWindow = nullptr;
     LuaFile* lua = nullptr;
     std::vector<LuaWidget*> widgets;

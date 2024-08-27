@@ -87,6 +87,18 @@ LuaTimeInterval::LuaTimeInterval(LuaFile* lua, sol::protected_function func, uin
     this->id = eventHandlerApp.setInterval(std::function<void(void)>(std::bind(&LuaTimeInterval::call, this)), interval);
 }
 
+
+uint32_t LuaTimeEvent::addEventListener(LuaFile* lua, sol::protected_function condition, sol::protected_function callback) {
+//    this->lua = lua;
+    this->condition = condition;
+    this->callback = callback;
+//    this->interval = interval;
+    // this->id = eventHandlerApp.setInterval(std::function<void(void)>(std::bind(&LuaTimeInterval::call, this)),);
+    return  0; //eventHandlerApp.addEventListener( (Function *) condition, (Function *) callback);
+}
+
+
+
 int LuaTimeInterval::getId()
 {
     return id;
@@ -130,7 +142,16 @@ int LuaTimeTimeout::getId()
 void LuaTimeTimeout::call()
 {
     if(func)
-        func();
+    {
+        sol::protected_function_result result = func();
+
+        // Check for errors
+        if (!result.valid()) {
+            sol::error err = result;
+            std::cerr << "Lua Error: " << err.what() << std::endl;
+        }
+    }
+
     done = true;
 }
 

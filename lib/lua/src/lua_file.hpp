@@ -14,6 +14,7 @@
 #include "lua_storage.hpp"
 #include "lua_gsm.hpp"
 #include "lua_json.hpp"
+#include "lua_network.hpp"
 
 
 struct Permissions
@@ -65,13 +66,13 @@ class LuaFile
 
         void event_onmessageerror()
         {
-            if(onmessage.valid()) {
+            if(onmessageerror.valid()) {
                 sol::protected_function_result result = onmessageerror();
                 if (!result.valid()) {
                     sol::error err = result;
-                    std::cout << "[LuaFile] onmessage event error: " << err.what() << std::endl;
+                    std::cout << "[LuaFile] onmessageerror event error: " << err.what() << std::endl;
                 } else {
-                    std::cout << "onmessage event activated" << std::endl;
+                    std::cout << "onmessageerror event activated" << std::endl;
                 }
             }
         }
@@ -88,7 +89,7 @@ class LuaFile
     LuaGui lua_gui;
     LuaStorage lua_storage;
     LuaTime lua_time;
-    //LuaNetwork lua_network;
+    LuaNetwork lua_network;
 };
 
 #endif

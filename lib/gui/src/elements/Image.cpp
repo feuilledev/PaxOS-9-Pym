@@ -34,7 +34,12 @@ namespace gui::ImagesList
 
         graphics::SImage i = graphics::SImage(path);
 
-        ImageLoaded img = { path, i.getWidth(), i.getHeight(), std::make_shared<graphics::Surface>(i.getWidth(), i.getHeight()) };
+        ImageLoaded img = { 
+            path, 
+            i.getWidth(), 
+            i.getHeight(), 
+            std::make_shared<graphics::Surface>(i.getWidth(), i.getHeight()) 
+        };
         
         uint16_t m_width = i.getWidth();
         uint16_t m_height = i.getHeight();
@@ -56,7 +61,7 @@ namespace gui::ImagesList
             if (img->surface.use_count() == 1)
             {
                 img = images.erase(img);
-                std::cout << "[Image] image deleted" << std::endl;
+                //std::cout << "[Image] image deleted" << std::endl;
             }
             else
             {
@@ -89,6 +94,25 @@ namespace gui::elements
         if(m_isRendered == false)
             load(m_backgroundColor);
     }
+
+    void Image::setTransparentColor(color_t color){
+        if ( ! m_surface) {
+            //std::cout << "[Image] m_surface is null";
+            load(color);
+        }
+        m_surface->setTransparentColor(color);
+        m_surface->setTransparency(true);
+    }
+
+/*    void Image::setTransparency(bool _transparent){
+        if (m_surface) {
+            m_surface->setTransparency(_transparent);
+        }
+        else{
+            std::cout << "[Image] m_surface is null";
+        }
+    }
+*/
 
     void Image::load(color_t background)
     {
