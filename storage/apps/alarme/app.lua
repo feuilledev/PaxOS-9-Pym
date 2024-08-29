@@ -21,6 +21,10 @@ listAlarme ={
 --    FONCTION HELPERS
 -- -------------------------------------------
 
+-- -------------------------------------------
+--    FONCTION HELPERS
+-- -------------------------------------------
+
 function int(x)
     return math.floor(x)
 end
@@ -82,6 +86,11 @@ end -- afficheHeure
 --     Ecran principal
 -- ---------------------------
 
+
+-- ---------------------------
+--     Ecran principal
+-- ---------------------------
+
 -- Affichage initiale de l'écran
 function init()
 
@@ -98,22 +107,29 @@ function init()
     lstAlarme = gui:vlist(win, 70, 110, 250, 280)
 
 
+
     for i, value in pairs(listAlarme) do
+
+        -- créer une box pour la ligne de l'alarme
 
         -- créer une box pour la ligne de l'alarme
         local case = gui:box(lstAlarme, 0, 0, 250, 25)
 
+        -- Affichage de l'heure
         -- Affichage de l'heure
         local heure = gui:label(case, 0, 0, 100, 18)
         heure:setText(value[2])
         heure:setFontSize(16)
 
         -- affichafe du nom
+        -- affichafe du nom
         local nom = gui:label(case, 100, 0, 100, 18)
         nom:setText(value[1])
         nom:setFontSize(16)
         nom:onClick(function() changeName(nom) end)
+        nom:onClick(function() changeName(nom) end)
 
+        -- afffichage du bouton d'activation
         -- afffichage du bouton d'activation
         local btnToggleAlarme = gui:switch(case, 200, 0, 18, 18)
         if value[3] then
@@ -133,16 +149,29 @@ function init()
     -- bouton +
     local add = gui:box(win, 250, 410, 40, 40)
     add:setBackgroundColor(COLOR_DARK)
+    add:setBackgroundColor(COLOR_DARK)
     add:setRadius(20)
     local icon_plus = gui:image(add, "plus.png", 14, 14, 12, 12, COLOR_DARK)
+    add:onClick(addAlarme)
+
     add:onClick(addAlarme)
 
     --add:onClick(newContact)
 
     -- bouton de test
     testAlarme = gui:button(win, 35, 400, 200, 38)
+    testAlarme = gui:button(win, 35, 400, 200, 38)
     testAlarme:setText("Test")
     testAlarme:onClick(
+            closeAlarme
+            
+            --    time:setTimeout(
+            --             gui:showInfoMessage("TimeOut") 
+            --        , 
+            --        10000
+            --    )
+            
+        )
             closeAlarme
             
             --    time:setTimeout(
@@ -173,6 +202,11 @@ function changeName(label)
     local keyboard = gui:keyboard("Placeholder", label:getText())
     label:setText(keyboard)
 end
+function changeName(label)
+    
+    local keyboard = gui:keyboard("Placeholder", label:getText())
+    label:setText(keyboard)
+end
 
 -- Fonction pour fermer la fenetre de l'application 
 -- lance le timer si l'alarme est active
@@ -180,13 +214,17 @@ function closeAlarme()
         -- get the time diff
         id = time:setTimeout( function() ringAlarme() end, 10000)
         print("id"..id)
+        id = time:setTimeout( function() ringAlarme() end, 10000)
+        print("id"..id)
 end -- function closeAlarme
+
 
 
 
 -- Fonction de lancement de l'alarme
 function ringAlarme()
     print("ringAlarme")
+    gui:showInfoMessage("TimeOut")
     gui:showInfoMessage("TimeOut")
     hardware:setVibrator(true);
 end

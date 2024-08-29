@@ -8,6 +8,8 @@
 
 #include <../../network/network.hpp>
 
+#include <../../network/network.hpp>
+
 
 /**
  * Helper fonction
@@ -63,7 +65,12 @@ int launcher()
     //light->setBackgroundColor(COLOR_RED);
     win.addChild(light);
 
+    Box *light = new Box(0, 77, 50, 325);
+    //light->setBackgroundColor(COLOR_RED);
+    win.addChild(light);
+
     Label *batt = new Label(269, 10, 40, 18);
+    batt->setText(std::to_string(GSM::getBatteryLevel()) + "%");    // hour
     batt->setText(std::to_string(GSM::getBatteryLevel()) + "%");    // hour
     batt->setVerticalAlignment(Label::Alignement::CENTER);
     batt->setHorizontalAlignment(Label::Alignement::CENTER);
@@ -76,8 +83,19 @@ int launcher()
     network->setFontSize(18);
     win.addChild(network);
 
+    Label *network = new Label(10, 10, 100, 18);
+    network->setVerticalAlignment(Label::Alignement::CENTER);
+    network->setHorizontalAlignment(Label::Alignement::LEFT);
+    network->setFontSize(18);
+    win.addChild(network);
+
     if(GSM::getNetworkStatus() == 99)
     {
+        network->setText(" pas de réseau");    // hour
+    }
+    else
+    {
+        network->setText(" " + std::to_string(GSM::getNetworkStatus() * 100 / 31) + "%");
         network->setText(" pas de réseau");    // hour
     }
     else
@@ -107,6 +125,7 @@ int launcher()
 
     // List contenant les app
     VerticalList* winListApps = new VerticalList(0, 150, 320, 316);
+    VerticalList* winListApps = new VerticalList(0, 150, 320, 316);
     win.addChild(winListApps);
 
     // Placement des app dans l'écran
@@ -120,18 +139,27 @@ int launcher()
         Box* box = new Box(35 + 85 * (placementIndex%3), 85 * int(placementIndex/3), 80, 80);
         box->setRadius(10);
         box->setBackgroundColor(COLOR_LIGHT_GREY);
+        Box* box = new Box(35 + 85 * (placementIndex%3), 85 * int(placementIndex/3), 80, 80);
+        box->setRadius(10);
+        box->setBackgroundColor(COLOR_LIGHT_GREY);
 
         Image* img = new Image(AppManager::appList[i].path / "../icon.png", 20, 6, 40, 40, COLOR_LIGHT_GREY);
+        Image* img = new Image(AppManager::appList[i].path / "../icon.png", 20, 6, 40, 40, COLOR_LIGHT_GREY);
         img->load();
+        //img->setTransparency(true);
+        img->setTransparentColor(COLOR_WHITE);
         //img->setTransparency(true);
         img->setTransparentColor(COLOR_WHITE);
         box->addChild(img);
 
         Label* text = new Label(5, 46, 70, 34);
 //        Label* text = new Label(0, 46, 80, 34);
+        Label* text = new Label(5, 46, 70, 34);
+//        Label* text = new Label(0, 46, 80, 34);
         text->setText(AppManager::appList[i].name);
         text->setVerticalAlignment(Label::Alignement::CENTER);
         text->setHorizontalAlignment(Label::Alignement::CENTER);
+        text->setBackgroundColor(COLOR_LIGHT_GREY);
         text->setBackgroundColor(COLOR_LIGHT_GREY);
         text->setFontSize(16);
         box->addChild(text);
@@ -180,6 +208,17 @@ int launcher()
                 eventHandlerApp.removeInterval(evid);
                 return i;
             }
+        }
+
+        if (light->isFocused(true))
+        {
+            std::cout << "brightness: " << graphics::brightness << std::endl;
+            graphics::brightness = (325 - (gui::ElementBase::touchY - 77)) * 255 / 325;
+            if(graphics::brightness > 255)
+                graphics::brightness = 255;
+            else if(graphics::brightness < 3)
+                graphics::brightness = 3;
+            graphics::setBrightness(graphics::brightness);
         }
 
         if (light->isFocused(true))
@@ -265,3 +304,4 @@ int launcher()
     eventHandlerApp.removeInterval(evid);
     return -1;
 }
+

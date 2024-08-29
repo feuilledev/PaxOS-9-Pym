@@ -64,6 +64,13 @@ LuaFile::~LuaFile()
     this->onlowbattery = sol::nil;
     this->oncharging = sol::nil;
 
+    // prevent a crash if the app is deleted and one or more callbacks are defined
+    this->onmessage = sol::nil;
+    this->onmessageerror = sol::nil;
+    this->oncall = sol::nil;
+    this->onlowbattery = sol::nil;
+    this->oncharging = sol::nil;
+
     // libérer les ressources (events, etc)
 }
 
@@ -77,6 +84,7 @@ void* custom_allocator(void *ud, void *ptr, size_t osize, size_t nsize) {
         return NULL;
     } else {
         // Allocate or resize the block
+        #ifdef ESP_PLATFORM
         #ifdef ESP_PLATFORM
             return ps_realloc(ptr, nsize);
         #else
@@ -165,6 +173,19 @@ void LuaFile::load()
     }
 
 
+
+        lua.open_libraries(sol::lib::string);
+
+    if (perms.acces_web)   // si web est autorisé
+    {
+//        lua.open_libraries(sol::lib::string);
+       lua.new_usertype<LuaNetwork>("network",
+            "callURL", &LuaNetwork::callURL
+        );
+        lua["network"] = &lua_network;
+    }
+
+
     if (perms.acces_hardware)   // si hardware est autorisé
     {
         lua.new_usertype<LuaHardware>("hardware",
@@ -206,6 +227,7 @@ void LuaFile::load()
             "get", &LuaJson::get,
             "is_null", &LuaJson::is_null,
             "at", &LuaJson::at,
+            "at", &LuaJson::at,
             "size", &LuaJson::size,
             "has_key", &LuaJson::has_key,
             "remove", &LuaJson::remove,
@@ -246,6 +268,8 @@ void LuaFile::load()
                 &LuaGui::image
             ),          
 //            "image", &LuaGui::image,
+            ),          
+//            "image", &LuaGui::image,
             "label", &LuaGui::label,
             "input", &LuaGui::input,
             "button", &LuaGui::button,
@@ -257,6 +281,11 @@ void LuaFile::load()
             "checkbox", &LuaGui::checkbox,
             "del", &LuaGui::del,
             "setWindow", &LuaGui::setMainWindow,
+            "getWindow", &LuaGui::getMainWindow,
+            "keyboard", &LuaGui::keyboard,
+            "showInfoMessage", &LuaGui::showInfoMessage,
+            "showWarningMessage", &LuaGui::showWarningMessage,
+            "showErrorMessage", &LuaGui::showErrorMessage
             "getWindow", &LuaGui::getMainWindow,
             "keyboard", &LuaGui::keyboard,
             "showInfoMessage", &LuaGui::showInfoMessage,
@@ -279,10 +308,17 @@ void LuaFile::load()
             "setBorderColor",&LuaWidget::setBorderColor,
             "setRadius",&LuaWidget::setRadius,
             "setBorderSize", &LuaWidget::setBorderSize,
+            "setBackgroundColor", &LuaWidget::setBackgroundColor,
+            "setBorderColor",&LuaWidget::setBorderColor,
+            "setRadius",&LuaWidget::setRadius,
+            "setBorderSize", &LuaWidget::setBorderSize,
             "enable", &LuaWidget::enable,
             "disable", &LuaWidget::disable,
             "isEnabled", &LuaWidget::isEnabled,
+            "isEnabled", &LuaWidget::isEnabled,
             "isTouched", &LuaWidget::isTouched,
+            "onClick", &LuaWidget::onClick,
+            "getChildAtIndex", &LuaWidget::getChildAtIndex
             "onClick", &LuaWidget::onClick,
             "getChildAtIndex", &LuaWidget::getChildAtIndex
         );
@@ -318,6 +354,8 @@ void LuaFile::load()
             sol::base_classes, sol::bases<LuaWidget>());
 
         lua.new_usertype<LuaImage>("LuaImage",
+            "setTransparentColor", &LuaImage::setTransparentColor,
+            sol::base_classes, sol::bases<LuaWidget>());            
             "setTransparentColor", &LuaImage::setTransparentColor,
             sol::base_classes, sol::bases<LuaWidget>());            
 
@@ -366,9 +404,13 @@ void LuaFile::load()
             "setIndex", &LuaVerticalList::setIndex,
             "setSpaceLine", &LuaVerticalList::setSpaceLine,
             "clear",&LuaVerticalList::clear,
+            "setSpaceLine", &LuaVerticalList::setSpaceLine,
+            "clear",&LuaVerticalList::clear,
             sol::base_classes, sol::bases<LuaWidget>());
 
         lua.new_usertype<LuaHorizontalList>("LuaHList",
+//            "add", &LuaHorizontalList::add,
+            "clear",&LuaHorizontalList::clear,
 //            "add", &LuaHorizontalList::add,
             "clear",&LuaHorizontalList::clear,
             sol::base_classes, sol::bases<LuaWidget>());
@@ -379,12 +421,17 @@ void LuaFile::load()
         lua.set("UP_ALIGNMENT", Label::Alignement::UP);
         lua.set("DOWN_ALIGNMENT", Label::Alignement::DOWN);
 
-            lua.set("COLOR_DARK", COLOR_DARK);
-            lua.set("COLOR_LIGHT", COLOR_LIGHT);
-            lua.set("COLOR_SUCCESS", COLOR_SUCCESS);
-            lua.set("COLOR_WARNING", COLOR_WARNING);
-            lua.set("COLOR_ERROR", COLOR_ERROR);
+        lua.set("COLOR_DARK", COLOR_DARK);
+        lua.set("COLOR_LIGHT", COLOR_LIGHT);
+        lua.set("COLOR_SUCCESS", COLOR_SUCCESS);
+        lua.set("COLOR_WARNING", COLOR_WARNING);
+        lua.set("COLOR_ERROR", COLOR_ERROR);
 
+        lua.set("COLOR_WHITE", COLOR_WHITE);
+        lua.set("COLOR_BLACK", COLOR_BLACK);
+        lua.set("COLOR_RED", COLOR_RED);
+        lua.set("COLOR_GREEN", COLOR_GREEN);
+        lua.set("COLOR_BLUE", COLOR_BLUE);
         lua.set("COLOR_WHITE", COLOR_WHITE);
         lua.set("COLOR_BLACK", COLOR_BLACK);
         lua.set("COLOR_RED", COLOR_RED);
@@ -415,6 +462,9 @@ void LuaFile::load()
                     // Ajout message d'erreur
                     GuiManager &guiManager = GuiManager::getInstance();
                     guiManager.showErrorMessage(e.what());
+                    // Ajout message d'erreur
+                    GuiManager &guiManager = GuiManager::getInstance();
+                    guiManager.showErrorMessage(e.what());
                 }
 
                 return true;
@@ -426,6 +476,10 @@ void LuaFile::load()
                 }
                 catch(std::runtime_error &e) {
                     std::cerr << "Erreur: " << e.what() << std::endl;
+                    // Ajout message d'erreur
+                    GuiManager &guiManager = GuiManager::getInstance();
+                    guiManager.showErrorMessage(e.what());
+
                     // Ajout message d'erreur
                     GuiManager &guiManager = GuiManager::getInstance();
                     guiManager.showErrorMessage(e.what());
@@ -534,6 +588,7 @@ void LuaFile::run(std::vector<std::string> arg)
 
     lua.script(code);   code.clear();  // load and delete the unnecessary code
 
+    SAFE_CALL(lua["run"], lua, arg);
     SAFE_CALL(lua["run"], lua, arg);
 }
 
