@@ -1,4 +1,4 @@
-# PaxOS 9 - test
+# PaxOS 9 - teste
 
 ![logo](https://github.com/paxo-phone/PaxOS-9/assets/45568523/ddb3b517-605c-41b4-8c1e-c8e5d156431b)
 
