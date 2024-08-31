@@ -1,4 +1,4 @@
-# Build Instructions
+# Build Instructions.
 
 If you are using CLion, please use the [CLion Instructions](#clion-instructions).
 
